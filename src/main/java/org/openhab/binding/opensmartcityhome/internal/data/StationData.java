@@ -7,11 +7,13 @@ import java.util.List;
 public class StationData {
     public String id;
     public String name;
+    public String status;
     public List<SensorData> sensors;
 
-    public StationData(String id, String name, List<SensorData> sensors) {
+    public StationData(String id, String name, String status, List<SensorData> sensors) {
         this.id = id;
         this.name = name;
+        this.status = status;
         this.sensors = sensors;
     }
 
@@ -22,5 +24,9 @@ public class StationData {
             }
         }
         return null;
+    }
+
+    public String getName() {
+        return name;
     }
 }

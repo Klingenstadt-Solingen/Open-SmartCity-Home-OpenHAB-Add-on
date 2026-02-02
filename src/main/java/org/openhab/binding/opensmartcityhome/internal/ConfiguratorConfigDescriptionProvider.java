@@ -2,6 +2,7 @@ package org.openhab.binding.opensmartcityhome.internal;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -11,9 +12,6 @@ import org.openhab.binding.opensmartcityhome.internal.data.StationData;
 import org.openhab.core.config.core.*;
 import org.openhab.core.thing.ThingTypeUID;
 import org.osgi.service.component.annotations.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 @NonNullByDefault
 @Component(service = ConfigDescriptionProvider.class)
@@ -24,8 +22,9 @@ public class ConfiguratorConfigDescriptionProvider implements ConfigDescriptionP
         if (!uri.toString().contains(SUPPORTED_THING_TYPE.getId())) {
             return null;
         }
-        
+
         List<StationData> stations = Constants.api.getAllStations();
+        stations.sort(Comparator.comparing(StationData::getName));
         ArrayList<ConfigDescriptionParameter> parameters = new ArrayList<>();
         for (StationData station : stations) {
             parameters.add(

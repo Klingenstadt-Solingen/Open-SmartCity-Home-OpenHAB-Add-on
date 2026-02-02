@@ -4,7 +4,6 @@ package org.openhab.binding.opensmartcityhome.internal.data;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.opensmartcityhome.internal.ConfiguratorHomeHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +49,15 @@ public class OpenSmartCityHomeApiImpl implements OpenSmartCityHomeApi {
                     try {
                         String stationId = node.get("id").asText();
                         String stationName = node.get("name").asText();
+                        String stationStatus = null;
+                        try {
+                            stationStatus = node.get("status").asText();
+                        } catch (Exception ignored) {}
+
+                        if (stationStatus == null) {
+                            stationStatus = "unknown";
+                        }
+                        stationStatus = stationStatus.toLowerCase();
 
                         if (stationId != null && stationName != null) {
                             List<SensorData> sensors = new ArrayList<>();
@@ -65,7 +73,7 @@ public class OpenSmartCityHomeApiImpl implements OpenSmartCityHomeApi {
                                     logger.error("Failed to parse sensor data!", e);
                                 }
                             }
-                            stations.add(new StationData(stationId, stationName, sensors));
+                            stations.add(new StationData(stationId, stationName, stationStatus, sensors));
                         }
                     } catch (Exception e) {
                         logger.error("Failed to parse station data!", e);

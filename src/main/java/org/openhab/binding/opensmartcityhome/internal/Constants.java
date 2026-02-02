@@ -35,7 +35,10 @@ public class Constants {
     public static final String MQTT_URI = "tcp://159.69.38.127:1883";
     public static final String MQTT_USERNAME = "demo-user";
     public static final String MQTT_PASSWORD = "demo-password";
-    public static final String MQTT_TOPIC = "opensmartcityhome/sensor/+/state";
+    public static final String MQTT_STATE_TOPIC_TYPE = "sensor";
+    public static final String MQTT_STATE_TOPIC = "opensmartcityhome/" + MQTT_STATE_TOPIC_TYPE + "/+/state";
+    public static final String MQTT_STATUS_TOPIC_TYPE = "station";
+    public static final String MQTT_STATUS_TOPIC = "opensmartcityhome/" + MQTT_STATUS_TOPIC_TYPE + "/+/status";
     public static final String API_URL = "http://159.69.38.127:8888/stations";
     public static final String API_USER = "client";
     public static final String API_PASSWORD = "client-password";

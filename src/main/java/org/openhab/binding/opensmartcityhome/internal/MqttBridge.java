@@ -8,7 +8,6 @@ import org.eclipse.paho.mqttv5.common.MqttSubscription;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ThingUID;
-import org.openhab.core.thing.binding.BaseThingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,8 @@ public class MqttBridge {
             client.connect(options);
 
             MqttSubscription[] subscriptions = new MqttSubscription[]{
-                    new MqttSubscription(MQTT_TOPIC, 1)
+                    new MqttSubscription(MQTT_STATE_TOPIC, 1),
+                    new MqttSubscription(MQTT_STATUS_TOPIC, 1)
             };
 
             IMqttMessageListener listener = (topic, mqttMessage) -> {
@@ -52,7 +52,7 @@ public class MqttBridge {
             IMqttMessageListener[] messageListeners = new IMqttMessageListener[]{ listener };
             client.subscribe(subscriptions, messageListeners);
 
-            logger.info("MQTT subscribed to topic {}", MQTT_TOPIC);
+            logger.info("MQTT subscribed to topic {}", MQTT_STATE_TOPIC);
 
         } catch (MqttException e) {
             logger.error("Error connecting/subscribing MQTT: {}", e.getMessage(), e);
@@ -71,22 +71,34 @@ public class MqttBridge {
     }
 
     private void handleMessage(String topic, String message) {
-        String sensorId = null;
         String[] parts = topic.split("/");
+
         if (parts.length == 4) {
-            sensorId = parts[2];
-        }
-        Double value = null;
-        try {
-            value = Double.parseDouble(message);
-        } catch (Exception ignored) {}
-        if (sensorId != null && value != null) {
-            String stationId = api.getStationIdFromSensorId(sensorId);
-            if (stationId != null && configuratorHomeHandler != null && configuratorHomeHandler.config != null) {
-                if (configuratorHomeHandler.config.selectedStationIds.contains(stationId)) {
-                    ThingUID stationUID = new ThingUID(BINDING_ID, STATION_THING_TYPE_KEY, stationId);
-                    ChannelUID channelUID = new ChannelUID(stationUID, sensorId);
-                    configuratorHomeHandler.updateSensorState(channelUID, new DecimalType(value));
+            String messageType = parts[1];
+            String messageId = parts[2];
+            String messagePath = parts[3];
+            if (messageType.equals(MQTT_STATE_TOPIC_TYPE) && messagePath.equals("state")) {
+                Double value = null;
+                try {
+                    value = Double.parseDouble(message);
+                } catch (Exception ignored) {
+                }
+                if (messageId != null && value != null) {
+                    String stationId = api.getStationIdFromSensorId(messageId);
+                    if (stationId != null && configuratorHomeHandler != null && configuratorHomeHandler.config != null) {
+                        if (configuratorHomeHandler.config.selectedStationIds.contains(stationId)) {
+                            ThingUID stationUID = new ThingUID(BINDING_ID, STATION_THING_TYPE_KEY, stationId);
+                            ChannelUID channelUID = new ChannelUID(stationUID, messageId);
+                            configuratorHomeHandler.updateSensorState(channelUID, new DecimalType(value));
+                        }
+                    }
+                }
+            } else if (messageType.equals(MQTT_STATUS_TOPIC_TYPE) && messagePath.equals("status")) {
+                if (messageId != null && message != null && configuratorHomeHandler.config != null) {
+                    if (configuratorHomeHandler.config.selectedStationIds.contains(messageId)) {
+                        ThingUID stationUID = new ThingUID(BINDING_ID, STATION_THING_TYPE_KEY, messageId);
+                        configuratorHomeHandler.updateStationStatus(stationUID, message);
+                    }
                 }
             }
         }

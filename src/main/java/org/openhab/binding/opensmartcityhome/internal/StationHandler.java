@@ -51,11 +51,23 @@ public class StationHandler extends BaseThingHandler {
                 }
             }
             updateThing(thingBuilder.build());
-
-            updateStatus(ThingStatus.ONLINE);
+            if (station.status.equals("online")) {
+                updateStatus(ThingStatus.ONLINE);
+            } else {
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.DISABLED, station.status);
+            }
         } else {
             logger.error("Station {} config could not be found!", stationId);
             updateStatus(ThingStatus.OFFLINE);
+        }
+    }
+
+    public void updateStationStatus(String status) {
+        String thingStatus = status.toLowerCase();
+        if (thingStatus.equals("online")) {
+            updateStatus(ThingStatus.ONLINE);
+        } else {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.DISABLED, thingStatus);
         }
     }
 }

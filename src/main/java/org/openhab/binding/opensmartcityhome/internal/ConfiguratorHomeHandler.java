@@ -20,6 +20,7 @@ import org.openhab.binding.opensmartcityhome.internal.data.ConfiguratorThingConf
 import org.openhab.binding.opensmartcityhome.internal.data.EmptyConfiguration;
 import org.openhab.core.thing.*;
 import org.openhab.core.thing.binding.BaseThingHandler;
+import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.osgi.framework.BundleContext;
@@ -125,5 +126,20 @@ public class ConfiguratorHomeHandler extends BaseThingHandler {
 
     public void updateSensorState(ChannelUID channelUID, State state) {
         updateState(channelUID, state);
+    }
+
+    public void updateStationStatus(ThingUID thingUID, String status) {
+        BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+        ServiceReference<ThingRegistry> reference = context.getServiceReference(ThingRegistry.class);
+        if (reference != null) {
+            ThingRegistry registry = context.getService(reference);
+            Thing station = registry.get(thingUID);
+            if (station != null) {
+                ThingHandler handler = station.getHandler();
+                if (handler instanceof StationHandler) {
+                    ((StationHandler) handler).updateStationStatus(status);
+                }
+            }
+        }
     }
 }
