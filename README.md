@@ -81,3 +81,7 @@ At this point, the Thing will be created **without any configuration**, and you 
 ## License
 
 This project is licensed under the [Open Smart City License](LICENSE.md).
+
+## Legal notices and data reliability
+
+Before using the data, please note the legal information [here](Legal-Notices-and-Data-Reliability.md).
